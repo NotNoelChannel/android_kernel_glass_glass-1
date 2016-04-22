@@ -52,6 +52,7 @@
 #include <linux/selinux.h>
 #include <linux/flex_array.h>
 #include <linux/vmalloc.h>
+#include <linux/ratelimit.h>
 #include <net/netlabel.h>
 
 #include "flask.h"
