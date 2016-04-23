@@ -21,7 +21,7 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: bcmsdh_linux.c 347638 2012-07-27 11:39:03Z $
+ * $Id: bcmsdh_linux.c 312788 2012-02-03 23:06:32Z $
  */
 
 /**
@@ -49,7 +49,6 @@ extern void dhdsdio_isr(void * args);
 #include <dhd.h>
 #endif /* defined(OOB_INTR_ONLY) */
 
-
 /**
  * SDIO Host Controller info
  */
@@ -72,7 +71,7 @@ struct bcmsdh_hc {
 	bool oob_irq_enable_flag;
 #if defined(OOB_INTR_ONLY)
 	spinlock_t irq_lock;
-#endif /* defined(OOB_INTR_ONLY) */
+#endif
 };
 static bcmsdh_hc_t *sdhcinfo = NULL;
 
@@ -145,11 +144,11 @@ EXPORT_SYMBOL(bcmsdh_remove);
 /* forward declarations */
 static int __devinit bcmsdh_probe(struct device *dev);
 static int __devexit bcmsdh_remove(struct device *dev);
-#endif /* defined(BCMLXSDMMC) */
+#endif /* BCMLXSDMMC */
 
-#if !defined(BCMLXSDMMC)
+#ifndef BCMLXSDMMC
 static
-#endif /* !defined(BCMLXSDMMC) */
+#endif /* BCMLXSDMMC */
 int bcmsdh_probe(struct device *dev)
 {
 	osl_t *osh = NULL;
@@ -159,7 +158,7 @@ int bcmsdh_probe(struct device *dev)
 #if !defined(BCMLXSDMMC) && defined(BCMPLATFORM_BUS)
 	struct platform_device *pdev;
 	struct resource *r;
-#endif /* !defined(BCMLXSDMMC) && defined(BCMPLATFORM_BUS) */
+#endif /* BCMLXSDMMC */
 	int irq = 0;
 	uint32 vendevid;
 	unsigned long irq_flags = 0;
@@ -170,7 +169,7 @@ int bcmsdh_probe(struct device *dev)
 	irq = platform_get_irq(pdev, 0);
 	if (!r || irq == NO_IRQ)
 		return -ENXIO;
-#endif /* !defined(BCMLXSDMMC) && defined(BCMPLATFORM_BUS) */
+#endif /* BCMLXSDMMC */
 
 #if defined(OOB_INTR_ONLY)
 #ifdef HW_OOB
@@ -203,7 +202,7 @@ int bcmsdh_probe(struct device *dev)
 
 	sdhc->dev = (void *)dev;
 
-#if defined(BCMLXSDMMC)
+#ifdef BCMLXSDMMC
 	if (!(sdh = bcmsdh_attach(osh, (void *)0,
 	                          (void **)&regs, irq))) {
 		SDLX_MSG(("%s: bcmsdh_attach failed\n", __FUNCTION__));
@@ -215,7 +214,7 @@ int bcmsdh_probe(struct device *dev)
 		SDLX_MSG(("%s: bcmsdh_attach failed\n", __FUNCTION__));
 		goto err;
 	}
-#endif /* defined(BCMLXSDMMC) */
+#endif /* BCMLXSDMMC */
 	sdhc->sdh = sdh;
 	sdhc->oob_irq = irq;
 	sdhc->oob_flags = irq_flags;
@@ -223,7 +222,7 @@ int bcmsdh_probe(struct device *dev)
 	sdhc->oob_irq_enable_flag = FALSE;
 #if defined(OOB_INTR_ONLY)
 	spin_lock_init(&sdhc->irq_lock);
-#endif /* defined(BCMLXSDMMC) */
+#endif
 
 	/* chain SDIO Host Controller info together */
 	sdhc->next = sdhcinfo;
@@ -253,9 +252,9 @@ err:
 	return -ENODEV;
 }
 
-#if !defined(BCMLXSDMMC)
+#ifndef BCMLXSDMMC
 static
-#endif /* !defined(BCMLXSDMMC) */
+#endif /* BCMLXSDMMC */
 int bcmsdh_remove(struct device *dev)
 {
 	bcmsdh_hc_t *sdhc, *prev;
@@ -628,9 +627,7 @@ int bcmsdh_register_oob_intr(void * dhdp)
 		if (error)
 			return -ENODEV;
 
-		error = enable_irq_wake(sdhcinfo->oob_irq);
-		if (error)
-			SDLX_MSG(("%s enable_irq_wake error=%d \n", __FUNCTION__, error));
+		enable_irq_wake(sdhcinfo->oob_irq);
 		sdhcinfo->oob_irq_registered = TRUE;
 		sdhcinfo->oob_irq_enable_flag = TRUE;
 	}
@@ -700,11 +697,6 @@ module_param(sd_f2_blocksize, int, 0);
 #ifdef BCMSDIOH_STD
 extern int sd_uhsimode;
 module_param(sd_uhsimode, int, 0);
-#endif
-
-#ifdef BCMSDIOH_TXGLOM
-extern uint sd_txglom;
-module_param(sd_txglom, uint, 0);
 #endif
 
 #ifdef BCMSDH_MODULE
