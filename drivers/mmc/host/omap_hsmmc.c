@@ -2809,7 +2809,6 @@ static int omap_hsmmc_suspend(struct device *dev)
 {
 	int ret = 0;
 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-	dev_err(dev,"%s(%d) [%08x]\n",__func__, __LINE__, dev);
 
 	if (!host)
 		return 0;
@@ -2866,7 +2865,7 @@ static int omap_hsmmc_resume(struct device *dev)
 {
 	int ret = 0;
 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-	dev_err(dev,"%s(%d) [%08x]\n",__func__, __LINE__, dev);
+
 	if (!host)
 		return 0;
 
